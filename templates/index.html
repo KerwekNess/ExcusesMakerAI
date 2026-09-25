@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Генератор Отмазок</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #3d2a4f;
+        --muted: #6d5a80;
+        --card: rgba(255, 255, 255, 0.72);
+        --accent: #ff6ea8;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body { margin: 0; min-height: 100%; }
+
+      body {
+        font-family: Nunito, "Segoe UI", sans-serif;
+        color: var(--ink);
+        overflow-x: hidden;
+        background: linear-gradient(120deg, #ffe6f2, #e8f7ff, #fff4d6, #e9ffe8, #f3e8ff);
+        background-size: 400% 400%;
+        animation: candyShift 18s ease-in-out infinite;
+      }
+
+      @keyframes candyShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      .blobs {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 0;
+      }
+
+      .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(18px);
+        opacity: 0.72;
+        animation: floaty 11s ease-in-out infinite;
+      }
+
+      @keyframes floaty {
+        0%, 100% { transform: translate(0, 0); }
+        50% { transform: translate(30px, 50px); }
+      }
+
+      .blob-a { width: 280px; height: 280px; left: -60px; top: 8%; background: radial-gradient(circle, #ff9ec8, #ffd3a5); }
+      .blob-b { width: 240px; height: 240px; right: -40px; top: 28%; background: radial-gradient(circle, #9ee7ff, #c9b6ff); animation-delay: -3s; }
+      .blob-c { width: 200px; height: 200px; left: 28%; bottom: -50px; background: radial-gradient(circle, #fff1a8, #b8f5c4); animation-delay: -6s; }
+
+      main {
+        position: relative;
+        z-index: 1;
+        width: min(680px, calc(100% - 32px));
+        margin: 56px auto;
+        padding: 32px 28px 28px;
+        background: var(--card);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(149, 94, 168, 0.18);
+        backdrop-filter: blur(16px);
+        animation: riseIn 0.7s ease;
+      }
+
+      @keyframes riseIn {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+
+      h1 {
+        font-family: Fredoka, sans-serif;
+        font-size: clamp(2rem, 5vw, 2.7rem);
+        font-weight: 600;
+        margin: 0 0 8px;
+        background: linear-gradient(90deg, #ff6ea8, #7b8cff, #47d6c4, #ffb347, #ff6ea8);
+        background-size: 220% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: shine 7s linear infinite;
+      }
+
+      @keyframes shine {
+        to { background-position: 220% center; }
+      }
+
+      .hint { margin: 0 0 22px; color: var(--muted); font-weight: 600; }
+
+      form { display: grid; gap: 14px; }
+
+      textarea {
+        width: 100%;
+        min-height: 132px;
+        padding: 16px 18px;
+        border: 2px solid #f3c7e4;
+        border-radius: 18px;
+        font: inherit;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.88);
+        outline: none;
+        resize: vertical;
+        transition: border-color 0.25s;
+      }
+
+      textarea:focus { border-color: var(--accent); }
+
+      button {
+        background: linear-gradient(135deg, #ff6ea8, #7b8cff);
+        color: white;
+        border: none;
+        padding: 16px;
+        border-radius: 18px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      button:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(255, 110, 168, 0.3); }
+      button:active { transform: scale(0.98); }
+      button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+      #result { margin-top: 24px; }
+
+      .excuse-item {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border-left: 4px solid var(--accent);
+        animation: fadeUp 0.5s ease-out forwards;
+      }
+
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .error { color: #ff4d4d; background: #ffe6e6; padding: 12px; border-radius: 12px; text-align: center; }
+      
+      .loader {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #FFF;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        display: inline-block;
+        box-sizing: border-box;
+        animation: rotation 1s linear infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+
+      @keyframes rotation {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blobs">
+      <div class="blob blob-a"></div>
+      <div class="blob blob-b"></div>
+      <div class="blob blob-c"></div>
+    </div>
+
+    <main>
+      <h1>Генератор Отмазок</h1>
+      <p class="hint">Введи ситуацию, и я придумаю, как из неё выйти!</p>
+      
+      <form id="excuseForm">
+        <textarea id="situation" placeholder="Например: Опоздал на встречу, потому что проспал..." required></textarea>
+        <button type="submit" id="submitBtn">Придумать отмазки</button>
+      </form>
+
+      <div id="result"></div>
+    </main>
+
+    <script>
+      const form = document.getElementById('excuseForm');
+      const btn = document.getElementById('submitBtn');
+      const resultDiv = document.getElementById('result');
+      const situationInput = document.getElementById('situation');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const situation = situationInput.value.trim();
+        if (!situation) return;
+
+        resultDiv.innerHTML = '';
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loader"></span> Думаю...';
+
+        try {
+          const response = await fetch('/api/excuses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ situation })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Something went wrong');
+          }
+
+          resultDiv.innerHTML = '';
+          data.items.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'excuse-item';
+            div.style.animationDelay = (index * 0.1) + 's';
+            div.textContent = item;
+            resultDiv.appendChild(div);
+          });
+
+        } catch (err) {
+          resultDiv.innerHTML = `<div class="error">❌ ${err.message}</div>`;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Придумать отмазки';
+        }
+      });
+    </script>
+  </body>
+</html>
